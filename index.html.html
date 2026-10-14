@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COFREX SLOTS</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: radial-gradient(circle at top, #25204a, #090912 70%);
+}
+
+.game {
+    width: min(440px, 94vw);
+    padding: 28px 22px;
+    text-align: center;
+    background: #141421;
+    border: 1px solid #393452;
+    border-radius: 22px;
+    box-shadow: 0 0 45px #8a42ff22;
+}
+
+h1 {
+    margin: 0;
+    color: #c5a0ff;
+    letter-spacing: 4px;
+    font-size: 32px;
+}
+
+.subtitle {
+    margin: 8px 0 24px;
+    color: #aaa5c5;
+    font-size: 12px;
+    letter-spacing: 2px;
+}
+
+.balance-box {
+    padding: 15px;
+    background: #202033;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.balance-label {
+    font-size: 11px;
+    color: #aaa5c5;
+    letter-spacing: 2px;
+}
+
+.balance {
+    margin-top: 6px;
+    color: #b8ffcf;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.machine {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 10px;
+    background: #090910;
+    border: 2px solid #65508c;
+    border-radius: 16px;
+}
+
+.reel {
+    position: relative;
+    width: 94px;
+    height: 110px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #222033;
+    border: 1px solid #51466e;
+}
+
+.number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 54px;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 0 15px #b78cff66;
+}
+
+.number.spinning {
+    animation: rollDown 1.65s cubic-bezier(.15,.65,.25,1) both;
+}
+
+@keyframes rollDown {
+    0% {
+        transform: translateY(0);
+        filter: blur(0);
+        opacity: 1;
+    }
+
+    8% {
+        transform: translateY(30px);
+        filter: blur(2px);
+        opacity: .3;
+    }
+
+    12% {
+        transform: translateY(-105px);
+        filter: blur(3px);
+        opacity: .1;
+    }
+
+    100% {
+        transform: translateY(0);
+        filter: blur(0);
+        opacity: 1;
+    }
+}
+
+.result {
+    min-height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 18px 0 10px;
+    font-weight: bold;
+    color: #d0c9e8;
+}
+
+button {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #9a55ff, #6733d5);
+    color: white;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform .15s, opacity .15s;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
+.reset {
+    background: #29283a;
+    color: #c7c2dc;
+    font-size: 12px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.stat {
+    padding: 12px 4px;
+    background: #202033;
+    border-radius: 10px;
+}
+
+.stat-label {
+    font-size: 10px;
+    color: #aaa5c5;
+}
+
+.stat-value {
+    margin-top: 7px;
+    font-weight: bold;
+}
+
+.note {
+    margin-top: 18px;
+    color: #79758f;
+    font-size: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+    <h1>COFREX</h1>
+    <div class="subtitle">S L O T S</div>
+
+    <div class="balance-box">
+        <div class="balance-label">TVŮJ ZŮSTATEK</div>
+        <div class="balance" id="balance">2 000 Kč</div>
+    </div>
+
+    <div class="machine">
+        <div class="reel"><div class="number" id="n0">7</div></div>
+        <div class="reel"><div class="number" id="n1">3</div></div>
+        <div class="reel"><div class="number" id="n2">5</div></div>
+    </div>
+
+    <div class="result" id="result">
+        Připraveno? Roztoč válce!
+    </div>
+
+    <button id="spin" onclick="spin()">
+        🎰 ROZTOČIT · 200 Kč
+    </button>
+
+    <button class="reset" onclick="resetGame()">
+        RESET HRY
+    </button>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-label">OTOČENÍ</div>
+            <div class="stat-value" id="spins">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">VÝHRY</div>
+            <div class="stat-value" id="wins">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">JACKPOTY</div>
+            <div class="stat-value" id="jackpots">0</div>
+        </div>
+    </div>
+
+    <div class="note">
+        VIRTUÁLNÍ KREDITY · HRA PRO ZÁBAVU
+    </div>
+</div>
+
+<script>
+const COST = 200;
+const TRIPLE_PRIZE = 550;
+const JACKPOT_PRIZE = 1200;
+const ANIMATION_MS = 1650;
+
+let balance = 2000;
+let spins = 0;
+let wins = 0;
+let jackpots = 0;
+let busy = false;
+
+const numberElements = [
+    document.getElementById("n0"),
+    document.getElementById("n1"),
+    document.getElementById("n2")
+];
+
+function formatMoney(value) {
+    return value.toLocaleString("cs-CZ") + " Kč";
+}
+
+function updateUI() {
+    document.getElementById("balance").textContent =
+        formatMoney(balance);
+
+    document.getElementById("spins").textContent = spins;
+    document.getElementById("wins").textContent = wins;
+    document.getElementById("jackpots").textContent = jackpots;
+
+    document.getElementById("spin").disabled =
+        busy || balance < COST;
+}
+
+function randomNumber() {
+    return Math.floor(Math.random() * 9) + 1;
+}
+
+function getOutcome() {
+    // Jackpot: 1.6% chance.
+    if (Math.random() < 0.016) {
+        return [8, 8, 8];
+    }
+
+    // Regular triple: 21% chance, after the jackpot check.
+    if (Math.random() < 0.21) {
+        const number = [1, 2, 3, 4, 5, 6, 7, 9][
+            Math.floor(Math.random() * 8)
+        ];
+
+        return [number, number, number];
+    }
+
+    // Ordinary non-winning combination.
+    const result = [
+        randomNumber(),
+        randomNumber(),
+        randomNumber()
+    ];
+
+    // Prevent an accidental triple on ordinary outcomes.
+    if (result[0] === result[1] &&
+        result[1] === result[2]) {
+        result[2] = result[2] % 9 + 1;
+    }
+
+    return result;
+}
+
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function spin() {
+    if (busy || balance < COST) return;
+
+    busy = true;
+    balance -= COST;
+    spins++;
+
+    document.getElementById("result").textContent =
+        "🎰 Válce se otáčejí...";
+
+    updateUI();
+
+    const outcome = getOutcome();
+
+    numberElements.forEach(element => {
+        element.classList.remove("spinning");
+
+        // Restart the CSS animation.
+        void element.offsetWidth;
+
+        element.textContent = randomNumber();
+        element.classList.add("spinning");
+    });
+
+    // Animate changing numbers for 1.65 seconds.
+    const interval = setInterval(() => {
+        numberElements.forEach(element => {
+            element.textContent = randomNumber();
+        });
+    }, 75);
+
+    await wait(ANIMATION_MS);
+
+    clearInterval(interval);
+
+    // Reveal the final result.
+    numberElements.forEach((element, index) => {
+        element.classList.remove("spinning");
+        element.textContent = outcome[index];
+    });
+
+    if (outcome[0] === 8 &&
+        outcome[1] === 8 &&
+        outcome[2] === 8) {
+
+        balance += JACKPOT_PRIZE;
+        jackpots++;
+        wins++;
+
+        document.getElementById("result").textContent =
+            "💎 JACKPOT! +1 200 Kč";
+
+    } else if (
+        outcome[0] === outcome[1] &&
+        outcome[1] === outcome[2]
+    ) {
+
+        balance += TRIPLE_PRIZE;
+        wins++;
+
+        document.getElementById("result").textContent =
+            "✨ TŘI STEJNÁ! +550 Kč";
+
+    } else {
+
+        document.getElementById("result").textContent =
+            "Tentokrát nic. Zkus další otočení!";
+    }
+
+    busy = false;
+    updateUI();
+}
+
+function resetGame() {
+    if (busy) return;
+
+    balance = 2000;
+    spins = 0;
+    wins = 0;
+    jackpots = 0;
+
+    numberElements.forEach(element => {
+        element.classList.remove("spinning");
+        element.textContent = randomNumber();
+    });
+
+    document.getElementById("result").textContent =
+        "Připraveno? Roztoč válce!";
+
+    updateUI();
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
